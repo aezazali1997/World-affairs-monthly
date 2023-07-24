@@ -8,7 +8,7 @@ export class UserController {
         }
         let data = await getTotalUsers(startDate, endDate);
         res.status(200).json({
-            totalUsers: data
+            data
         })
     }
     static async usersVsMonth(req: Request, res: Response) {
@@ -22,13 +22,13 @@ export class UserController {
         })
     }
     static async uniqueVisitors(req: Request, res: Response) {
-        const { startDate, endDate, startDate2, endDate2 } = req.body
+        const { startDate, endDate } = req.body
         if (!startDate || !endDate) {
             return res.status(400).send('startDate and EndDate is required')
         }
         let data = await uniqueVisitors(startDate, endDate)
         res.status(200).json({
-            uniqueUsers: data
+            data
         })
     }
     static async uniqueVsReturningVisitors(req: Request, res: Response) {

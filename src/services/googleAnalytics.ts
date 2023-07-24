@@ -23,7 +23,7 @@ export async function getCountriesReport(startDate: string, endDate: string) {
         metrics: [{ name: 'eventCount' }],
       },
     });
-    const countryData = response.data.rows!.map((row) => {
+    const countryData = response.data.rows!.map((row: any) => {
       return { country: row.dimensionValues![0].value, users: row.metricValues![0].value };
     });
 
@@ -66,7 +66,7 @@ export async function getCitiesReport(startDate: string, endDate: string) {
 
 
     });
-    const cityUserData = response.data.rows!.map((row) => {
+    const cityUserData = response.data.rows!.map((row: any) => {
       return { city: row.dimensionValues![0].value, users: row.metricValues![0].value };
     });
     return cityUserData;
@@ -105,7 +105,7 @@ export async function getMobileDesktopPercentage(startDate: string, endDate: str
     let desktopUsers = 0;
     let mobileUsers = 0;
 
-    rows!.forEach((row) => {
+    rows!.forEach((row: any) => {
       const dimensionValue = row.dimensionValues![0].value!.toLowerCase();
       const metricValue = parseInt(row.metricValues![0].value!);
 
@@ -149,12 +149,12 @@ export async function getWebsiteViews(startDate: string, endDate: string) {
     // The response will contain the total number of views for the specified date range.
     const rows = response.data.rows;
     const totalViews = rows!.reduce(
-      (totalViews, row) => totalViews + parseInt(row.metricValues![0].value!),
+      (totalViews: any, row: any) => totalViews + parseInt(row.metricValues![0].value!),
       0
     );
 
     // `totalViews` will now contain the total number of views for the specified date range.
-    return totalViews;
+    return { totalViews };
   } catch (err) {
     console.error('Error retrieving analytics data:', err);
   }
@@ -199,11 +199,11 @@ export async function getList(startDate: string, endDate: string) {
         });
 
         // Parse the response data and convert it to the desired format.
-        const formattedData = data.rows!.map((row) => {
+        const formattedData = data.rows!.map((row: any) => {
           const [country, city, deviceCategory, operatingSystem,] = row.dimensionValues!.map(
-            (value) => value.value
+            (value: any) => value.value
           );
-          const [averageSessionDuration, newUsers] = row!.metricValues!.map((value) => value.value)
+          const [averageSessionDuration, newUsers] = row!.metricValues!.map((value: any) => value.value)
 
           return {
             country,
@@ -259,7 +259,7 @@ export const getTotalUsers = async (startDate: string, endDate: string) => {
     });
     const totalUsers = data.rows![0].metricValues![0].value
 
-    return totalUsers;
+    return { totalUsers };
   } catch (error) {
     console.error('An error occurred:', error);
     return null;
@@ -307,7 +307,7 @@ export const usersVSMonth = async (startDate: string, endDate: string) => {
 
 
 
-    const return_data = data.rows!.map((row) => {
+    const return_data = data.rows!.map((row: any) => {
       const dimensions = row.dimensionValues;
       const metrics = row.metricValues![0].value;
       const yearMonth = dimensions![0].value!.replace(/(\d{4})(\d{2})/, '$1-$2');
@@ -316,7 +316,7 @@ export const usersVSMonth = async (startDate: string, endDate: string) => {
         users: parseInt(metrics!, 10),
       };
     });
-    return_data.sort((a, b) => (a.yearMonth > b.yearMonth ? 1 : -1));
+    return_data.sort((a: any, b: any) => (a.yearMonth > b.yearMonth ? 1 : -1));
 
     return return_data;
   } catch (error) {
@@ -362,12 +362,14 @@ export const uniqueVisitors = async (startDate: string, endDate: string) => {
       property: `properties/${propertyId}`,
       requestBody: request,
     });
-    data.rows?.map((row) => {
+    data.rows?.map((row: any) => {
       if (row.dimensionValues![0].value === 'new') {
         unique = row.metricValues![0].value
       }
     })
-    return unique;
+    return {
+      unique
+    };
   }
   catch (error) {
     console.error('An error occurred:', error);
@@ -412,7 +414,7 @@ export const uniqueVsReturningVisitors = async (startDate: string, endDate: stri
       }
     });
     if (data.rows) {
-      data.rows.map((row) => {
+      data.rows.map((row: any) => {
         if (row!.dimensionValues![0].value === 'new') {
           unique = +(row!.metricValues![0].value!)
         }

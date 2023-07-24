@@ -9,7 +9,7 @@ export class VisitController {
         }
         let data = await getWebsiteViews(startDate, endDate);
         return res.status(200).json({
-            "totalVisits": data
+            data
         })
     }
 
