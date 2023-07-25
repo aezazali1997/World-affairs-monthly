@@ -3,4 +3,4 @@ import { DeviceController } from '../controllers/device.controller'
 const deviceController = new DeviceController();
 export const DeviceRouter = express.Router();
 
-DeviceRouter.get('/', deviceController.getMobileDesktopPercentage)
+DeviceRouter.post('/', deviceController.getMobileDesktopPercentage)
