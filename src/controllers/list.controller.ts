@@ -1,11 +1,14 @@
 import { Request, Response } from 'express';
-import { getList, maleVsFemale, AgeStats } from '../services/googleAnalytics';
+import { GoogleAnalyticsDataApi } from '../services/googleAnalytics';
 
 export class ListController {
-    static async getList(req: Request, res: Response) {
 
-
-
+    googleAnalytics = new GoogleAnalyticsDataApi();
+    constructor() {
+        this.ageStats = this.ageStats.bind(this)
+        this.getList = this.getList.bind(this)
+    }
+    getList = async (req: Request, res: Response) => {
         const { startDate, endDate } = req.body
         if (!startDate || !endDate) {
             return res.status(400).send('startDate and EndDate is required')
@@ -13,7 +16,7 @@ export class ListController {
 
 
         try {
-            let data = await getList(startDate, endDate);
+            let data = await this.googleAnalytics.getList(startDate, endDate);
             res.status(200).json({
                 data
             });
@@ -22,13 +25,13 @@ export class ListController {
         }
     }
 
-    static async maleVsFemale(req: Request, res: Response) {
+    maleVsFemale = async (req: Request, res: Response) => {
         try {
             const { startDate, endDate } = req.body
             if (!startDate || !endDate) {
                 return res.status(400).send('startDate and EndDate is required')
             }
-            let data = await maleVsFemale(startDate, endDate);
+            let data = await this.googleAnalytics.maleVsFemale(startDate, endDate);
             res.status(200).json({
                 data
             });
@@ -37,13 +40,13 @@ export class ListController {
         }
     }
 
-    static async ageStats(req: Request, res: Response) {
+    ageStats = async (req: Request, res: Response) => {
         try {
             const { startDate, endDate } = req.body
             if (!startDate || !endDate) {
                 return res.status(400).send('startDate and EndDate is required')
             }
-            let data = await AgeStats(startDate, endDate);
+            let data = await this.googleAnalytics.AgeStats(startDate, endDate);
             res.status(200).json({
                 data
             });

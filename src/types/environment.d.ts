@@ -22,7 +22,7 @@ declare global {
             GOOGLE_CLIENT_X509_CERT_URL: string
             GOOGLE_UNIVERSE_DOMAIN: string
             GOOGLE_VIEW_ID: string
-            GOOGLE_GA4_PROPERTY_ID: number
+            GOOGLE_GA4_PROPERTY_ID: string
 
 
         }
