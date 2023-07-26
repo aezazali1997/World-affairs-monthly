@@ -5,7 +5,7 @@ import helmet from 'helmet';
 
 import { config } from 'dotenv'
 config();
-
+import { getDomainMetrics } from './services/Cpanel'
 import { CountryRouter } from './routes/country.routes'
 import { CityRouter } from './routes/city.routes'
 import { VisitRouter } from './routes/visit.routes'
@@ -44,8 +44,17 @@ class App {
 
   public routes(): void {
     this.app.get('/', (req: Request, res: Response) => {
-      res.send('Welcome to Backend');
+
+      const domainName = 'worldaffairsmonthly.com';
+      getDomainMetrics(domainName)
+        .then((metricsData) => {
+          if (metricsData) {
+            console.log(metricsData);
+          }
+        });
+      res.status(200).send('ok')
     });
+
   }
 
   private startServer() {

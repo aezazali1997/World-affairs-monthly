@@ -265,6 +265,13 @@ export class GoogleAnalyticsDataApi {
     }
 
   }
+  // const data = [
+  //   { name: '18-24', value: 20 },
+  //   { name: '25-34', value: 30 },
+  //   { name: '35-44', value: 25 },
+  //   { name: '45-54', value: 15 },
+  //   { name: '55+', value: 10 },
+  // ];
   public AgeStats = async (startDate: string, endDate: string) => {
 
     try {
@@ -276,23 +283,48 @@ export class GoogleAnalyticsDataApi {
           dimensions: [{ name: 'userAgeBracket' }],
         },
       });
-      let ageBracket = 0;
-      let usersCount = 0;
-      let ageData = { ageBracket, usersCount }
+      // Create a mapping for age brackets returned by Google Analytics to the desired age brackets
+      const ageBracketMap: { [key: string]: string } = {
+        '18-24': '18-24',
+        '25-34': '25-34',
+        '35-44': '35-44',
+        '45-54': '45-54',
+        '55-64': '55+',
+        '65+': '55+', // Combine 65+ with 55+ in the same category
+      };
+
+      // Provided age brackets
+      const ageBrackets = ['18-24', '25-34', '35-44', '45-54', '55+'];
+
+      // Initialize ageData object with all age brackets set to 0
+      const ageData = ageBrackets.reduce((result: { [key: string]: number }, bracket) => {
+        result[bracket] = 0;
+        return result;
+      }, {});
+
       if (data.rows) {
+        // Update ageData with values from Google Analytics data
+        data.rows.forEach((row: any) => {
+          const ageBracket = row.dimensions![0];
+          const usersCount = parseInt(row.metrics![0].values![0], 10);
 
-        const ageData = data.rows!.map((row: any) => {
+          // Map the age bracket to the desired format using the ageBracketMap
+          const name = ageBracketMap[ageBracket];
 
-          ageBracket = row.dimensions![0];
-
-          usersCount = parseInt(row.metrics![0].values![0], 10);
-
-          return { ageBracket, usersCount };
+          // Add the usersCount to the corresponding age group
+          if (name) {
+            ageData[name] = usersCount;
+          }
         });
       }
-      return ageData;
+
+      // Convert the ageData object to the final array format
+      const finalAgeData = Object.keys(ageData).map((name) => ({ name, value: ageData[name] }));
+
+      return finalAgeData;
     } catch (error) {
       console.error('Error retrieving analytics data:', error);
+      return [];
     }
   }
   public getTotalUsers = async (startDate: string, endDate: string) => {
