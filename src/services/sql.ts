@@ -29,14 +29,14 @@ export class SQLService {
 
         return SQLService.instance;
     }
-    public async getAllIP(pageNumber: number = 1, pageSize: number = 10) {
+    public async getAllIP(pageNumber: number = 1, pageSize: number = 10, startDate: Date, endDate: Date) {
         try {
             const client = this.connection;
             const offset = (pageNumber - 1) * pageSize;
-            const query = `SELECT * FROM ip_address LIMIT ? OFFSET ?`;
+            const query = `SELECT * FROM ip_address WHERE created_at >= ? AND created_at <= ? LIMIT ? OFFSET ?`;
 
             const results: any[] = await new Promise((resolve, reject) => {
-                client.query(query, [pageSize, offset], (err: any, results: any) => {
+                client.query(query, [startDate, endDate, pageSize, offset], (err: any, results: any) => {
                     if (err) {
                         console.error('Error executing query:', err);
                         reject(err);
@@ -86,7 +86,8 @@ export class SQLService {
                     proxy,
                     mobile,
                     isp,
-                    organization
+                    organization,
+                    date: item.created_at
                 };
             }));
 

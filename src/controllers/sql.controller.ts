@@ -9,11 +9,11 @@ export class SqlController {
 
 
     getIPs = async (req: Request, res: Response) => {
-        const { pageSize, pageNumber } = req.body
+        const { pageSize, pageNumber, startDate, endDate } = req.body
 
 
         try {
-            let data = await this.sqlService.getAllIP(pageNumber, pageSize);
+            let data = await this.sqlService.getAllIP(pageNumber, pageSize, new Date(startDate), new Date(endDate));
             return res.status(200).json({ data })
 
         } catch (error) {
