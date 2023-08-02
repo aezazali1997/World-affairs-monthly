@@ -9,7 +9,8 @@ declare global {
             DB_HOST: string;
             DB_PORT: number;
             DB_NAME: string;
-            DB_URI: string;
+            DB_USER: string;
+            DB_PASSWORD: string;
             GOOGLE_SERVICE_TYPE: string;
             GOOGLE_PROJECT_ID: string;
             GOOGLE_PRIVATE_KEY_ID: string;

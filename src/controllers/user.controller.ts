@@ -43,6 +43,24 @@ export class UserController {
             data
         })
     }
+    last30Minute = async (req: Request, res: Response) => {
+
+
+        let data = await this.googleAnalytics.last30Minute()
+        res.status(200).json({
+            data
+        })
+    }
+    getUserInterest = async (req: Request, res: Response) => {
+        const { startDate, endDate } = req.body
+        if (!startDate || !endDate) {
+            return res.status(400).send('startDate and EndDate is required')
+        }
+        let data = await this.googleAnalytics.getUserInterests(startDate, endDate)
+        res.status(200).json({
+            data
+        })
+    }
 
 
 }

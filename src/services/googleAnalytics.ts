@@ -1,4 +1,6 @@
 import { google } from "googleapis";
+import { DateUtils } from '../utils/Date-utils'
+import countriesData from '../utils/countries-data.json'
 export class GoogleAnalyticsDataApi {
 
   private auth: any
@@ -21,18 +23,23 @@ export class GoogleAnalyticsDataApi {
     this.analyticsDataApi = google.analyticsdata({ version: 'v1beta', auth: this.auth });
 
   }
-  public async getCountires(startDate: string, endDate: string) {
+  public getCountires = async (startDate: string, endDate: string) => {
     try {
       const response = await this.analyticsDataApi.properties.runReport({
         property: `properties/${this.propertyId}`,
         requestBody: {
           dateRanges: [{ startDate, endDate }],
-          dimensions: [{ name: 'country' }],
+          dimensions: [{ name: 'country' }, { name: 'countryId' }],
           metrics: [{ name: 'eventCount' }],
         },
       });
       const countryData = response.data.rows!.map((row: any) => {
-        return { country: row.dimensionValues![0].value, users: row.metricValues![0].value };
+        let countryCode = row.dimensionValues![1].value as string
+        return {
+          country: row.dimensionValues![0].value,
+          image: countriesData[`${countryCode as keyof typeof countriesData}`].image,
+          users: row.metricValues![0].value
+        };
       });
 
       return countryData
@@ -43,10 +50,7 @@ export class GoogleAnalyticsDataApi {
     }
 
   }
-
-
-
-  public async getCitiesReport(startDate: string, endDate: string) {
+  public getCitiesReport = async (startDate: string, endDate: string) => {
 
 
     try {
@@ -69,7 +73,7 @@ export class GoogleAnalyticsDataApi {
     }
   }
 
-  public async getWebsiteViews(startDate: string, endDate: string) {
+  public getWebsiteViews = async (startDate: string, endDate: string) => {
     try {
       const response = await this.analyticsDataApi.properties.runReport({
         property: `properties/${this.propertyId}`,
@@ -92,7 +96,7 @@ export class GoogleAnalyticsDataApi {
       console.error('Error retrieving analytics data:', err);
     }
   }
-  public async getMobileDesktopPercentage(startDate: string, endDate: string) {
+  public getMobileDesktopPercentage = async (startDate: string, endDate: string) => {
     try {
       const response = await this.analyticsDataApi.properties.runReport({
         property: `properties/${this.propertyId}`,
@@ -106,6 +110,7 @@ export class GoogleAnalyticsDataApi {
 
       let desktopUsers = 0;
       let mobileUsers = 0;
+      let tabletUsers = 0;
 
       rows!.forEach((row: any) => {
         const dimensionValue = row.dimensionValues![0].value!.toLowerCase();
@@ -116,15 +121,18 @@ export class GoogleAnalyticsDataApi {
         } else if (dimensionValue === 'mobile') {
           mobileUsers = metricValue;
         }
+        else if (dimensionValue === 'tablet') {
+          tabletUsers = metricValue;
+        }
       });
 
-      return { desktopUsers, mobileUsers };
+      return { desktopUsers, tabletUsers, mobileUsers };
 
     } catch (err) {
       console.error('Error retrieving analytics data:', err);
     }
   }
-  public async getList(startDate: string, endDate: string) {
+  public getList = async (startDate: string, endDate: string) => {
 
     const propertyConfigurations = [
       {
@@ -132,6 +140,7 @@ export class GoogleAnalyticsDataApi {
         metrics: [{ name: 'averageSessionDuration' }, { name: 'newUsers' }],
         dimensions: [
           { name: 'country' },
+          { name: 'countryId' },
           { name: 'city' },
           { name: 'deviceCategory' },
           { name: 'operatingSystem' },
@@ -154,13 +163,15 @@ export class GoogleAnalyticsDataApi {
 
           // Parse the response data and convert it to the desired format.
           const formattedData = data.rows!.map((row: any) => {
-            const [country, city, deviceCategory, operatingSystem,] = row.dimensionValues!.map(
+            const [country, countryId, city, deviceCategory, operatingSystem,] = row.dimensionValues!.map(
               (value: any) => value.value
             );
             const [averageSessionDuration, newUsers] = row!.metricValues!.map((value: any) => value.value)
+            const image = countriesData[`${countryId as keyof typeof countriesData}`].image
 
             return {
               country,
+              flag: image,
               city,
               deviceCategory,
               operatingSystem,
@@ -265,13 +276,7 @@ export class GoogleAnalyticsDataApi {
     }
 
   }
-  // const data = [
-  //   { name: '18-24', value: 20 },
-  //   { name: '25-34', value: 30 },
-  //   { name: '35-44', value: 25 },
-  //   { name: '45-54', value: 15 },
-  //   { name: '55+', value: 10 },
-  // ];
+
   public AgeStats = async (startDate: string, endDate: string) => {
 
     try {
@@ -340,6 +345,11 @@ export class GoogleAnalyticsDataApi {
           name: 'activeUsers',
         },
       ],
+      dimensions: [
+        {
+          name: 'newVsReturning'
+        }
+      ]
     };
 
     try {
@@ -348,7 +358,15 @@ export class GoogleAnalyticsDataApi {
         requestBody: request,
 
       });
-      const totalUsers = data.rows![0].metricValues![0].value
+      let totalUsers = 0;
+      if (data.rows) {
+        data.rows.forEach((row: any) => {
+          if (row.dimensionValues[0].value !== '(not set)') {
+            totalUsers += +row.metricValues[0].value
+          }
+        })
+
+      }
       return { totalUsers };
     } catch (error) {
       console.error('An error occurred:', error);
@@ -439,7 +457,6 @@ export class GoogleAnalyticsDataApi {
 
   public uniqueVsReturningVisitors = async (startDate: string, endDate: string) => {
 
-
     try {
       let unique = 0;
       let returning = 0
@@ -481,6 +498,151 @@ export class GoogleAnalyticsDataApi {
     }
     catch (error) {
       console.error('An error occurred:', error);
+    }
+  }
+  public last30Minute = async () => {
+    try {
+      const { data } = await this.analyticsDataApi.properties.runRealtimeReport({
+        property: `properties/${this.propertyId}`,
+        requestBody: {
+          metrics: [
+            {
+              name: 'activeUsers', // Use 'activeUsers' metric to get the number of users for the specified date range
+            },
+          ],
+          minuteRanges: [
+            {
+              startMinutesAgo: 29,
+              endMinutesAgo: 0
+            }
+          ]
+
+        },
+      });
+      let last30MinuteUsers = 0
+      if (data.rows) {
+        last30MinuteUsers = data.rows[0].metricValues[0].value;
+
+      }
+      return { last30MinuteUsers };
+    } catch (error) {
+      console.error('An error occurred:', error);
+      return null;
+    }
+  }
+  public averageEngagementTime = async (startDate: string, endDate: string) => {
+    try {
+
+      const response = await this.analyticsDataApi.properties.runReport({
+        property: `properties/${this.propertyId}`,
+        requestBody: {
+          dateRanges: [
+            {
+              startDate: startDate,
+              endDate: endDate,
+            },
+          ],
+          metrics: [
+            {
+              name: 'userEngagementDuration',
+
+            },
+          ]
+        },
+      });
+
+      const averageEngagementTime = response.data.rows[0].metricValues[0].value
+      return {
+        averageEngagementTime
+      }
+    } catch (error) {
+      console.error('Error retrieving analytics data:', error);
+    }
+  }
+  public getMostViewedPages = async (startDate: string, endDate: string) => {
+    try {
+      const response = await this.analyticsDataApi.properties.runReport({
+        property: `properties/${this.propertyId}`,
+        requestBody: {
+          dateRanges: [
+            {
+              startDate: startDate,
+              endDate: endDate,
+            },
+          ],
+          dimensions: [
+            {
+              name: 'pagePath',
+            },
+          ],
+          metrics: [
+            {
+              name: 'screenPageViews',
+            },
+          ],
+
+        },
+      });
+
+
+      const pages = response.data.rows.map((row: any) => ({
+        pagePath: row.dimensionValues[0].value === '/' ? 'home' : row.dimensionValues[0].value,
+        views: row.metricValues[0].value,
+      }));
+      // Sort the pages by views in descending order
+      const sortedPages = pages.sort((a: any, b: any) => b.views - a.views);
+
+      // Get the top 3 most viewed pages
+
+
+
+      return {
+        mostViewedPages: sortedPages
+      }
+    } catch (error) {
+      console.error('Error retrieving analytics data:', error);
+    }
+  }
+  public getUserInterests = async (startDate: string, endDate: string) => {
+    let interests = [
+      {
+        interest: '',
+        activeUsers: 0
+      }
+    ]
+    try {
+      const response = await this.analyticsDataApi.properties.runReport({
+        property: `properties/${this.propertyId}`,
+        requestBody: {
+
+          dateRanges: [
+            {
+              startDate: startDate,
+              endDate: endDate,
+            }
+          ],
+          dimensions: [
+            { name: 'brandingInterest' }
+          ],
+          metrics: [
+            { name: 'activeUsers' }
+          ],
+          limit: 10, // Limit the result to the top 10 user interests
+        }
+      });
+
+      if (response.data.rows) {
+        interests = response.data.rows[0].map((row: any) => ({
+          interest: row.dimensionValues[0],
+          activeUsers: row.metricValues[0].value,
+        }));
+      }
+
+
+      return interests;
+    } catch (error) {
+      console.error('Error retrieving analytics data:', error);
+      return interests;
     }
   }
 }
