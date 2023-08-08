@@ -158,10 +158,13 @@ export class SQLService {
             let queryParams: any = [];
 
             if (type) {
-                query = `SELECT * FROM trackers WHERE type=?`;
+                query = `SELECT id, type, title, COUNT(*) AS count, MIN(created_at) AS created_at, MAX(updated_at) AS updated_at 
+                         FROM trackers 
+                         WHERE type=?`;
                 queryParams.push(type);
             } else {
-                query = `SELECT * FROM trackers`;
+                query = `SELECT id, type, title, COUNT(*) AS count, MIN(created_at) AS created_at, MAX(updated_at) AS updated_at 
+                         FROM trackers`;
             }
 
             if (startDate && endDate) {
@@ -169,6 +172,7 @@ export class SQLService {
                 queryParams.push(startDate, endDate);
             }
 
+            query += ' GROUP BY title';
             query += ' LIMIT ? OFFSET ?';
             queryParams.push(pageSize, offset);
 
@@ -233,6 +237,4 @@ export class SQLService {
 
         return sortedFrequencyMap;
     }
-
-
 }
