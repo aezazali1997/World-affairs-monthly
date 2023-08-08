@@ -20,5 +20,48 @@ export class SqlController {
             res.status(400).send('Error while fetching data');
         }
     }
+    bestAudio = async (req: Request, res: Response) => {
+        try {
+            let data = await this.sqlService.bestAudio()
+            res.status(200).json({
+                ...data
+            })
+
+        } catch (error) {
+            res.status(400).send('Error while fetchong data')
+        }
+
+    }
+    bestArticle = async (req: Request, res: Response) => {
+        try {
+            let data = await this.sqlService.bestArticle()
+            res.status(200).json({
+                ...data
+            })
+
+        } catch (error) {
+            res.status(400).send('Error while fetchong data')
+        }
+
+    }
+    getAllContent = async (req: Request, res: Response) => {
+        const { startDate, endDate, type } = req.body
+        const { pageSize, pageNumber } = req.params
+        try {
+            let data = await this.sqlService.getAllContent(startDate, endDate, type, pageSize, pageNumber);
+            res.status(200).json({
+                data
+            })
+        } catch (error) {
+
+        }
+        // will accept 
+        // pageSize
+        // pageNumber
+        // StarDate
+        // EndDate
+        // Type
+
+    }
 
 }

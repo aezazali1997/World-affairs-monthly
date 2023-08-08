@@ -98,6 +98,97 @@ export class SQLService {
         }
     }
 
+    public bestAudio = async () => {
+
+        try {
+            const client = this.connection;
+            const query = `SELECT * FROM trackers WHERE type='Audio'`;
+            const results: any[] = await new Promise((resolve, reject) => {
+                client.query(query, (err: any, results: any) => {
+                    if (err) {
+                        console.error('Error executing query:', err);
+                        reject(err);
+                    } else {
+                        resolve(results);
+                    }
+                });
+            });
+            let data = this.calculateFrequency(results);
+            return {
+                mostFamousAudio: Object.keys(data)[0],
+                Views: Object.values(data)[0]
+            }
+
+
+        } catch (error) {
+
+        }
+    }
+    public bestArticle = async () => {
+
+        try {
+            const client = this.connection;
+            const query = `SELECT * FROM trackers WHERE type='Article'`;
+            const results: any[] = await new Promise((resolve, reject) => {
+                client.query(query, (err: any, results: any) => {
+                    if (err) {
+                        console.error('Error executing query:', err);
+                        reject(err);
+                    } else {
+                        resolve(results);
+                    }
+                });
+            });
+            let data = this.calculateFrequency(results);
+            return {
+                mostFamousArticle: Object.keys(data)[0],
+                Views: Object.values(data)[0]
+            }
+
+
+        } catch (error) {
+
+        }
+    }
+    public getAllContent = async (startDate: any, endDate: any, type: any, pageSize: any = 10, pageNumber: any = 1) => {
+        try {
+            const client = this.connection;
+            const offset = (pageNumber - 1) * pageSize;
+            let query = '';
+            let queryParams: any = [];
+
+            if (type) {
+                query = `SELECT * FROM trackers WHERE type=?`;
+                queryParams.push(type);
+            } else {
+                query = `SELECT * FROM trackers`;
+            }
+
+            if (startDate && endDate) {
+                query += ' AND created_at >= ? AND created_at <= ?';
+                queryParams.push(startDate, endDate);
+            }
+
+            query += ' LIMIT ? OFFSET ?';
+            queryParams.push(pageSize, offset);
+
+            const results: any[] = await new Promise((resolve, reject) => {
+                client.query(query, queryParams, (err: any, results: any) => {
+                    if (err) {
+                        console.error('Error executing query:', err);
+                        reject(err);
+                    } else {
+                        resolve(results);
+                    }
+                });
+            });
+
+            return results;
+        } catch (error) {
+            console.log('Error:', error);
+            throw error;
+        }
+    }
     public async getServiceProviderForIP(ipAddress: string): Promise<string> {
         try {
             const hostnames = await dns.promises.reverse(ipAddress);
@@ -115,6 +206,7 @@ export class SQLService {
             return error;
         }
     }
+
     getCountryName(countryCode: string) {
         // @ts-ignore
         return countries[countryCode] || 'Unknown';
@@ -124,7 +216,23 @@ export class SQLService {
         const key = `${countryCode}-${regionCode}`;
         return subdivision(key) || regionCode;
     }
+    public calculateFrequency = (arr: any) => {
+        const countArray: any = {}
 
+        arr.forEach((content: any) => {
+            const { title } = content
+            countArray[title] = (countArray[title] || 0) + 1
+        })
+
+
+        const frequencyArray = Object.entries(countArray);
+
+        frequencyArray.sort((a: any, b: any) => b[1] - a[1]);
+
+        const sortedFrequencyMap = Object.fromEntries(frequencyArray);
+
+        return sortedFrequencyMap;
+    }
 
 
 }
