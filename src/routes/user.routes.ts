@@ -14,7 +14,7 @@ userRouter.post('/unique-returning', usrController.uniqueVsReturningVisitors)
 userRouter.post('/interest', usrController.getUserInterest)
 userRouter.get('/best-audio', sqlController.bestAudio)
 userRouter.get('/best-article', sqlController.bestArticle)
-userRouter.get('/all', sqlController.getAllContent)
+userRouter.post('/all-content', sqlController.getAllContent)
 
 
 

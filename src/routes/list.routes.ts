@@ -8,4 +8,4 @@ export const ListRouter = express.Router();
 ListRouter.post('/', listController.getList)
 ListRouter.post('/male-female-stats', listController.maleVsFemale)
 ListRouter.post('/age-stats', listController.ageStats)
-ListRouter.get('/ip', sqlController.getIPs)
+ListRouter.post('/ip', sqlController.getIPs)

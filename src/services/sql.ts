@@ -29,14 +29,13 @@ export class SQLService {
 
         return SQLService.instance;
     }
-    public async getAllIP(pageNumber: number = 1, pageSize: number = 10, startDate: Date, endDate: Date) {
+    public async getAllIP(startDate: Date, endDate: Date) {
         try {
             const client = this.connection;
-            const offset = (pageNumber - 1) * pageSize;
-            const query = `SELECT * FROM ip_address WHERE created_at >= ? AND created_at <= ? LIMIT ? OFFSET ?`;
+            const query = `SELECT * FROM ip_address WHERE created_at >= ? AND created_at <= ?`;
 
             const results: any[] = await new Promise((resolve, reject) => {
-                client.query(query, [startDate, endDate, pageSize, offset], (err: any, results: any) => {
+                client.query(query, [startDate, endDate], (err: any, results: any) => {
                     if (err) {
                         console.error('Error executing query:', err);
                         reject(err);
@@ -76,7 +75,7 @@ export class SQLService {
                     IpAddress: item.ip_addres,
                     ServiceProvider: serviceProvider,
                     country: this.getCountryName(country),
-                    flag: countriesData[`${geo.country as keyof typeof countriesData}`].image,
+                    flag: geo ? countriesData[`${geo.country as keyof typeof countriesData}`]?.image : "",
                     countryCode: country,
                     region: this.getRegionName(country, region),
                     city,
@@ -150,10 +149,9 @@ export class SQLService {
 
         }
     }
-    public getAllContent = async (startDate: any, endDate: any, type: any, pageSize: any = 10, pageNumber: any = 1) => {
+    public getAllContent = async (startDate: any, endDate: any, type: any) => {
         try {
             const client = this.connection;
-            const offset = (pageNumber - 1) * pageSize;
             let query = '';
             let queryParams: any = [];
 
@@ -173,8 +171,6 @@ export class SQLService {
             }
 
             query += ' GROUP BY title';
-            query += ' LIMIT ? OFFSET ?';
-            queryParams.push(pageSize, offset);
 
             const results: any[] = await new Promise((resolve, reject) => {
                 client.query(query, queryParams, (err: any, results: any) => {

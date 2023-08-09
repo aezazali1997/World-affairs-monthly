@@ -9,11 +9,11 @@ export class SqlController {
 
 
     getIPs = async (req: Request, res: Response) => {
-        const { pageSize, pageNumber, startDate, endDate } = req.body
+        const { startDate, endDate } = req.body
 
 
         try {
-            let data = await this.sqlService.getAllIP(pageNumber, pageSize, new Date(startDate), new Date(endDate));
+            let data = await this.sqlService.getAllIP(new Date(startDate), new Date(endDate));
             return res.status(200).json({ data })
 
         } catch (error) {
@@ -46,21 +46,14 @@ export class SqlController {
     }
     getAllContent = async (req: Request, res: Response) => {
         const { startDate, endDate, type } = req.body
-        const { pageSize, pageNumber } = req.params
         try {
-            let data = await this.sqlService.getAllContent(startDate, endDate, type, pageSize, pageNumber);
+            let data = await this.sqlService.getAllContent(startDate, endDate, type);
             res.status(200).json({
                 data
             })
         } catch (error) {
-
+            console.log(error)
         }
-        // will accept 
-        // pageSize
-        // pageNumber
-        // StarDate
-        // EndDate
-        // Type
 
     }
 
