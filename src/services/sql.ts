@@ -121,6 +121,12 @@ export class SQLService {
 
 
         } catch (error) {
+            console.log('Error', error)
+            return {
+                mostFamousAudio: null,
+                Views: 0
+            }
+
 
         }
     }
@@ -147,6 +153,11 @@ export class SQLService {
 
 
         } catch (error) {
+            console.log("Error ", error)
+            return {
+                mostFamousArticle: null,
+                Views: 0
+            }
 
         }
     }
@@ -187,7 +198,8 @@ export class SQLService {
             return results;
         } catch (error) {
             console.log('Error:', error);
-            throw error;
+            return []
+
         }
     }
     public async getServiceProviderForIP(ipAddress: string): Promise<string> {

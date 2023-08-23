@@ -46,6 +46,7 @@ export class GoogleAnalyticsDataApi {
 
     } catch (error) {
       console.error('Error retrieving analytics data:', error);
+      return []
 
     }
 
@@ -70,6 +71,7 @@ export class GoogleAnalyticsDataApi {
       return cityUserData;
     } catch (err) {
       console.error('Error retrieving analytics data:', err);
+      return []
     }
   }
 
@@ -94,6 +96,7 @@ export class GoogleAnalyticsDataApi {
       return { totalViews };
     } catch (err) {
       console.error('Error retrieving analytics data:', err);
+      return []
     }
   }
   public getMobileDesktopPercentage = async (startDate: string, endDate: string) => {
@@ -130,6 +133,7 @@ export class GoogleAnalyticsDataApi {
 
     } catch (err) {
       console.error('Error retrieving analytics data:', err);
+      return []
     }
   }
   public getList = async (startDate: string, endDate: string) => {
@@ -186,6 +190,7 @@ export class GoogleAnalyticsDataApi {
       return results;
     } catch (error) {
       console.error('An error occurred:', error);
+      return []
     }
   }
   public maleVsFemale = async (startDate: string, endDate: string) => {
@@ -272,6 +277,8 @@ export class GoogleAnalyticsDataApi {
     }
     catch (error) {
       console.error('An error occurred:', error);
+      return []
+
 
     }
 
@@ -411,7 +418,7 @@ export class GoogleAnalyticsDataApi {
       return return_data;
     } catch (error) {
       console.error('An error occurred:', error);
-      return null;
+      return [];
     }
   }
   public uniqueVisitors = async (startDate: string, endDate: string) => {
@@ -451,6 +458,8 @@ export class GoogleAnalyticsDataApi {
     }
     catch (error) {
       console.error('An error occurred:', error);
+      return []
+
 
     }
   }
@@ -498,6 +507,7 @@ export class GoogleAnalyticsDataApi {
     }
     catch (error) {
       console.error('An error occurred:', error);
+      return []
     }
   }
   public last30Minute = async () => {
@@ -527,7 +537,7 @@ export class GoogleAnalyticsDataApi {
       return { last30MinuteUsers };
     } catch (error) {
       console.error('An error occurred:', error);
-      return null;
+      return []
     }
   }
   public averageEngagementTime = async (startDate: string, endDate: string) => {
@@ -557,6 +567,8 @@ export class GoogleAnalyticsDataApi {
       }
     } catch (error) {
       console.error('Error retrieving analytics data:', error);
+      return []
+
     }
   }
   public getMostViewedPages = async (startDate: string, endDate: string) => {
@@ -601,6 +613,8 @@ export class GoogleAnalyticsDataApi {
       }
     } catch (error) {
       console.error('Error retrieving analytics data:', error);
+      return []
+
     }
   }
   public getUserInterests = async (startDate: string, endDate: string) => {
